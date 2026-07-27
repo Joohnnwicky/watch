@@ -2,6 +2,9 @@
 
 本地运行的军事新闻聚合阅读器。抓取多国军方/防务媒体的 RSS,用大模型生成「今日要点」摘要并翻译标题,呈现为按「国家 → 军种」两级折叠的看板。
 
+<img width="1435" height="1670" alt="localhost-哨兵  Watch-fpscreenshot" src="https://github.com/user-attachments/assets/a2d2b660-5677-43b9-b657-90196fffb753" />
+
+
 - **9 国**:美国 / 中国 / 俄罗斯 / 英国 / 法国 / 日本 / 印度 / 以色列 / 乌克兰
 - **9 类**:陆军 / 海军 / 空军 / 太空军 / 海军陆战队 / 国民警卫队 / 政府机构 / 智库 / 报刊
 - **四段流水线**:`fetch.py` 抓取 → `digest.py` AI 要点+翻译 → `index.html` 看板 → `server.py` 本地服务
