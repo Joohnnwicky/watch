@@ -1,5 +1,5 @@
 {
-  "_comment": "军事新闻策展源 - 8 国 / 9 类(陆军/海军/空军/太空军/海军陆战队/国民警卫队/政府机构/智库/报刊)。源条目用 country+branch 两字段归类。redline_keywords 留空,自填。死链用 scripts/build_sources.py 实测后替换。注:部分官方源(中国军网/国防部、美 DoD、Brookings/CSIS 等)经 Cloudflare 反爬或无 RSS,纯 urllib 难抓,后续可加 curl+Chrome TLS 适配器。",
+  "_comment": "哨兵(Watch)策展源 - 9 国 / 9 类(陆军/海军/空军/太空军/海军陆战队/国民警卫队/政府机构/智库/报刊)。源条目用 country+branch 两字段归类。redline_keywords 留空,自填。死链用 scripts/build_sources.py 实测后替换,或用面板(⚙)贴官网自动发现。注:部分官方源(中国军网/国防部、美 DoD 等)经 Cloudflare 反爬或无 RSS,纯 urllib 难抓。",
   "fetch": {
     "per_source": 6,
     "timeout": 20,

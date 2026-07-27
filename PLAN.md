@@ -1,4 +1,4 @@
-# 军事新闻 RSS 阅读器 — 实施计划
+# 哨兵 Watch(军事新闻 RSS 阅读器)- 实施计划
 
 基于 [investment-news](https://github.com/simonlin1212/investment-news) 项目，复用其四段式流水线（fetch → digest → index，server.py 串联，纯 Python 标准库 + 一个大模型），把「12 行业扁平分类」改为「国家 → 军种/类别」三级结构，AI「今日要点」按**国家**出。
 
