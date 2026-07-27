@@ -183,11 +183,25 @@
 <div class="modal" id="srcModal">
   <div class="modal-card">
     <div class="modal-head">
-      <h2>RSS 源管理</h2>
+      <h2>设置</h2>
       <span id="srcCount" style="font-size:12px;color:hsl(var(--muted-foreground));font-weight:500;"></span>
       <button class="x" id="srcClose">×</button>
     </div>
-    <div class="modal-body" id="srcList"></div>
+    <div class="modal-body">
+      <div style="padding:14px 22px 10px; border-bottom:1px solid hsl(var(--border));">
+        <div style="font-size:12px; font-weight:700; letter-spacing:.05em; color:hsl(var(--muted-foreground)); margin-bottom:10px;">模型设置</div>
+        <div class="add-form">
+          <select id="cfgProvider" title="大模型 provider">
+            <option value="claude-cli">Claude 订阅(本机,免费)</option>
+            <option value="api">API(DeepSeek等,按量)</option>
+          </select>
+          <input type="password" id="cfgKey" placeholder="API key(选 API 时填)" autocomplete="off">
+          <button class="add-btn" id="cfgSave">保存</button>
+        </div>
+        <div class="add-hint" id="cfgHint">选 API 模式后填 key,保存即生效(写本地 secrets.json,不进 git)。</div>
+      </div>
+      <div id="srcList"></div>
+    </div>
     <div class="modal-foot">
       <div class="add-form">
         <input type="text" id="addUrl" placeholder="贴官网 URL 或 RSS 链接,如 https://www.navalnews.com/">
@@ -413,8 +427,38 @@ function boot(){
     addHint.className='add-hint'; addHint.textContent='贴官网地址会自动发现 RSS;也可直接贴 RSS 链接。无 RSS 时用 AI 判断分类。';
     document.getElementById('addUrl').value='';
     loadSources();
+    loadConfig();
   }
   function closeSrcModal(){ modal.classList.remove('open'); }
+
+  function loadConfig(){
+    fetch('/api/config').then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok) return;
+      document.getElementById('cfgProvider').value=d.provider||'claude-cli';
+      var h=document.getElementById('cfgHint');
+      if(d.has_key){ h.className='add-hint ok'; h.textContent='已设 key: '+d.key_masked; }
+      else { h.className='add-hint'; h.textContent='选 API 模式后填 key,保存即生效(写本地 secrets.json,不进 git)。'; }
+      document.getElementById('cfgKey').value='';   // 不回显明文
+    }).catch(function(){});
+  }
+  var cfgSave=document.getElementById('cfgSave');
+  if(cfgSave) cfgSave.onclick=function(){
+    var provider=document.getElementById('cfgProvider').value;
+    var key=document.getElementById('cfgKey').value.trim();
+    cfgSave.disabled=true; cfgSave.textContent='保存中…';
+    fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({provider:provider,api_key:key})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        cfgSave.disabled=false; cfgSave.textContent='保存';
+        if(d&&d.ok){
+          var h=document.getElementById('cfgHint');
+          if(d.has_key){ h.className='add-hint ok'; h.textContent='已设 key: '+d.key_masked; }
+          else { h.className='add-hint'; h.textContent='未设 key(将用环境变量 LLM_API_KEY)'; }
+          document.getElementById('cfgKey').value='';
+        } else { document.getElementById('cfgHint').textContent='保存失败:'+(d&&d.error||''); }
+      }).catch(function(e){ cfgSave.disabled=false; cfgSave.textContent='保存'; alert('保存失败:'+e); });
+  };
 
   function loadSources(){
     fetch('/api/sources').then(function(r){return r.json();}).then(function(d){

@@ -13,6 +13,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 HERE = os.path.dirname(os.path.abspath(__file__))
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8793
 SOURCES = os.path.join(HERE, "sources.json")
+SECRETS = os.path.join(HERE, "secrets.json")
 
 
 def urllib_host(url):
@@ -175,11 +176,58 @@ class Handler(SimpleHTTPRequestHandler):
         except Exception:
             return ""
 
+    def _config_get(self):
+        # 读 llm.config.json(模板,provider 默认)+ secrets.json(本地 key)
+        cfg, _ = {}, None
+        try:
+            cfg = json.load(open(os.path.join(HERE, "llm.config.json"), encoding="utf-8"))
+        except Exception:
+            cfg = {"provider": "claude-cli"}
+        sec = {}
+        if os.path.exists(SECRETS):
+            try: sec = json.load(open(SECRETS, encoding="utf-8"))
+            except Exception: pass
+        provider = sec.get("provider") or cfg.get("provider", "claude-cli")
+        has_key = bool(sec.get("api_key"))
+        # key 只回显末4位,避免明文泄露到前端/网络抓包
+        masked = ""
+        k = sec.get("api_key") or ""
+        if k: masked = "••••" + k[-4:]
+        return self._json(200, {"ok": True, "provider": provider,
+                               "has_key": has_key, "key_masked": masked})
+
+    def _config_set(self):
+        body = self._read_body()
+        try: req = json.loads(body) if body else {}
+        except Exception: return self._json(400, {"ok": False, "error": "非法JSON"})
+        sec = {}
+        if os.path.exists(SECRETS):
+            try: sec = json.load(open(SECRETS, encoding="utf-8"))
+            except Exception: pass
+        if "provider" in req:
+            p = (req.get("provider") or "").strip()
+            if p in ("claude-cli", "api"): sec["provider"] = p
+        if "api_key" in req:
+            k = (req.get("api_key") or "").strip()
+            if k: sec["api_key"] = k
+            else: sec.pop("api_key", None)   # 空串=清空 key
+        # 原子写 secrets.json
+        try:
+            fd, tmp = tempfile.mkstemp(dir=HERE, suffix=".tmp")
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                json.dump(sec, f, ensure_ascii=False, indent=2)
+            os.replace(tmp, SECRETS)
+        except Exception as e:
+            return self._json(500, {"ok": False, "error": str(e)})
+        return self._config_get()
+
     def do_POST(self):
         if self.path.startswith("/api/refresh"):
             return self._refresh()
         if self.path.startswith("/api/sources"):
             return self._sources_add()
+        if self.path.startswith("/api/config"):
+            return self._config_set()
         self.send_error(404)
 
     def do_DELETE(self):
@@ -190,6 +238,8 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/sources"):
             return self._sources_get()
+        if self.path.startswith("/api/config"):
+            return self._config_get()
         # /api/refresh 只走 POST:GET 会跑 fetch.py+claude 子进程,若可 GET 触发则易被
         # <img>/跳转做 CSRF。这里让它落到静态处理(404),仅 do_POST 才真正刷新。
         return super().do_GET()

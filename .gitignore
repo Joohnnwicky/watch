@@ -14,3 +14,6 @@ scripts/_*
 
 # 不要把含真实 key 的本地配置覆盖提交;模板里 key 始终留空,走 LLM_API_KEY 环境变量
 llm.config.local.json
+
+# 面板填的 API key 写这里,绝不进 git
+secrets.json

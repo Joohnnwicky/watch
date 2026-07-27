@@ -32,12 +32,26 @@ def find_claude():
 
 def load_config(root):
     p = os.path.join(root, "llm.config.json")
+    cfg = None
     if os.path.exists(p):
         try:
-            return json.load(open(p, encoding="utf-8"))
+            cfg = json.load(open(p, encoding="utf-8"))
         except Exception:
             pass
-    return {"provider": "claude-cli"}
+    if not cfg:
+        cfg = {"provider": "claude-cli"}
+    # 合并本地 secrets.json(面板填的 key 写这里,gitignore 不进 git)
+    sp = os.path.join(root, "secrets.json")
+    if os.path.exists(sp):
+        try:
+            sec = json.load(open(sp, encoding="utf-8"))
+            if sec.get("api_key"):
+                cfg.setdefault("api", {})["api_key"] = sec["api_key"]
+            if sec.get("provider"):
+                cfg["provider"] = sec["provider"]
+        except Exception:
+            pass
+    return cfg
 
 
 def _call_cli(system, user, timeout):
