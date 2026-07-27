@@ -1,0 +1,98 @@
+{
+  "_comment": "军事新闻策展源 - 8 国 / 9 类(陆军/海军/空军/太空军/海军陆战队/国民警卫队/政府机构/智库/报刊)。源条目用 country+branch 两字段归类。redline_keywords 留空,自填。死链用 scripts/build_sources.py 实测后替换。注:部分官方源(中国军网/国防部、美 DoD、Brookings/CSIS 等)经 Cloudflare 反爬或无 RSS,纯 urllib 难抓,后续可加 curl+Chrome TLS 适配器。",
+  "fetch": {"per_source": 6, "timeout": 20, "recent_days": 7},
+  "countries": [
+    {"key":"us","name":"美国","accent":"#3b82f6"},
+    {"key":"cn","name":"中国","accent":"#dc2626"},
+    {"key":"ru","name":"俄罗斯","accent":"#7c3aed"},
+    {"key":"uk","name":"英国","accent":"#06b6d4"},
+    {"key":"fr","name":"法国","accent":"#0ea5e9"},
+    {"key":"jp","name":"日本","accent":"#ec4899"},
+    {"key":"in","name":"印度","accent":"#f97316"},
+    {"key":"il","name":"以色列","accent":"#6366f1"},
+    {"key":"ua","name":"乌克兰","accent":"#eab308"}
+  ],
+  "regions": [
+    {"key":"tw","name":"中国台湾","accent":"#10b981","parent":"cn"}
+  ],
+  "branches": [
+    {"key":"army","name":"陆军"},
+    {"key":"navy","name":"海军"},
+    {"key":"airforce","name":"空军"},
+    {"key":"space","name":"太空军"},
+    {"key":"marines","name":"海军陆战队"},
+    {"key":"guard","name":"国民警卫队"},
+    {"key":"gov","name":"政府机构"},
+    {"key":"thinktank","name":"智库"},
+    {"key":"press","name":"报刊"}
+  ],
+  "sources": [
+    {"name":"Army Times","country":"us","branch":"army","type":"rss","url":"https://www.armytimes.com/arc/outboundfeeds/rss/"},
+    {"name":"Navy Times","country":"us","branch":"navy","type":"rss","url":"http://feeds.feedburner.com/navy-times/news/your-navy"},
+    {"name":"Air Force Times","country":"us","branch":"airforce","type":"rss","url":"https://www.airforcetimes.com/arc/outboundfeeds/rss/"},
+    {"name":"Marine Corps Times","country":"us","branch":"marines","type":"rss","url":"https://www.marinecorpstimes.com/arc/outboundfeeds/rss/"},
+    {"name":"War on the Rocks","country":"us","branch":"thinktank","type":"rss","url":"https://warontherocks.com/feed/"},
+    {"name":"Breaking Defense","country":"us","branch":"press","type":"rss","url":"http://feeds.feedburner.com/BreakingDefense/"},
+    {"name":"Task & Purpose","country":"us","branch":"press","type":"rss","url":"http://taskandpurpose.com/feed/"},
+    {"name":"Defense News","country":"us","branch":"press","type":"rss","url":"http://feeds.feedburner.com/defense-news/home"},
+    {"name":"Defense One","country":"us","branch":"press","type":"rss","url":"https://www.defenseone.com/rss/all/"},
+    {"name":"Military Times","country":"us","branch":"press","type":"rss","url":"http://feeds.feedburner.com/military-times/news/pentagon-congress"},
+    {"name":"Naval News","country":"us","branch":"navy","type":"rss","url":"https://www.navalnews.com/feed/"},
+    {"name":"The War Zone","country":"us","branch":"press","type":"rss","url":"https://www.twz.com/feed"},
+    {"name":"Defence Blog","country":"us","branch":"press","type":"rss","url":"https://defence-blog.com/feed/"},
+    {"name":"DefenseScoop","country":"us","branch":"press","type":"rss","url":"https://defensescoop.com/feed/"},
+    {"name":"The War Horse","country":"us","branch":"press","type":"rss","url":"https://thewarhorse.org/feed/"},
+    {"name":"MilitaryLand.net","country":"us","branch":"press","type":"rss","url":"https://militaryland.net/feed/"},
+    {"name":"MilitaryLeak","country":"us","branch":"press","type":"rss","url":"https://militaryleak.com/feed/"},
+    {"name":"RealClearDefense","country":"us","branch":"press","type":"rss","url":"https://www.realcleardefense.com/index.xml"},
+    {"name":"WSJ World News","country":"us","branch":"press","type":"rss","url":"https://feeds.content.dowjones.io/public/rss/RSSWorldNews"},
+    {"name":"DVIDS","country":"us","branch":"gov","type":"rss","url":"https://www.dvidshub.net/rss/news/?type=news"},
+    {"name":"RAND","country":"us","branch":"thinktank","type":"rss","url":"https://www.rand.org/pubs/research_reports.xml/rss"},
+    {"name":"CNAS","country":"us","branch":"thinktank","type":"rss","url":"https://ai-rss-rho.vercel.app/rss/cba94c96"},
+    {"name":"War Room (Army War College)","country":"us","branch":"thinktank","type":"rss","url":"https://warroom.armywarcollege.edu/category/podcasts/feed/"},
+    {"name":"Small Wars Journal","country":"us","branch":"thinktank","type":"rss","url":"https://smallwarsjournal.com/feed/"},
+    {"name":"Irregular Warfare Initiative","country":"us","branch":"thinktank","type":"rss","url":"https://irregularwarfare.org/feed/"},
+    {"name":"Seapower Magazine","country":"us","branch":"press","type":"rss","url":"https://seapowermagazine.org/feed/"},
+    {"name":"Popular Mechanics","country":"us","branch":"press","type":"rss","url":"https://www.popularmechanics.com/rss/military.xml"},
+    {"name":"Stars and Stripes","country":"us","branch":"press","type":"rss","url":"https://subscribe.stripes.com/rss/africa.xml"},
+    {"name":"USNI News","country":"us","branch":"navy","type":"rss","url":"https://news.usni.org/feed"},
+    {"name":"Air Force Technology","country":"us","branch":"airforce","type":"rss","url":"https://www.airforce-technology.com/feed/"},
+    {"name":"MeriTalk","country":"us","branch":"press","type":"rss","url":"https://www.meritalk.com/feed/"},
+    {"name":"Forecast International","country":"us","branch":"thinktank","type":"rss","url":"https://dsm.forecastinternational.com/feed/"},
+    {"name":"Tactical Defense Media","country":"us","branch":"press","type":"rss","url":"https://tacticaldefensemedia.com/feed/"},
+    {"name":"Over the Horizon","country":"us","branch":"thinktank","type":"rss","url":"https://othjournal.com/feed/"},
+    {"name":"Arms Control Association","country":"us","branch":"thinktank","type":"rss","url":"http://feeds.feedburner.com/ArmsControlAssociationUpdates"},
+
+    {"name":"新华网军事","country":"cn","branch":"press","type":"rss","url":"http://www.xinhuanet.com/mil/news_mil.xml"},
+    {"name":"中新网军事","country":"cn","branch":"press","type":"rss","url":"https://www.chinanews.com.cn/rss/mil.xml"},
+    {"name":"中国政府网","country":"cn","branch":"gov","type":"rss","url":"https://www.gov.cn/pushinfo/v150203/rss.xml"},
+
+    {"name":"TASS 塔斯社","country":"ru","branch":"press","type":"rss","url":"https://tass.com/rss/v2.xml"},
+    {"name":"RT","country":"ru","branch":"press","type":"rss","url":"https://www.rt.com/rss/"},
+    {"name":"Военное обозрение","country":"ru","branch":"press","type":"rss","url":"https://topwar.ru/rss.xml"},
+    {"name":"Lenta.ru","country":"ru","branch":"press","type":"rss","url":"https://lenta.ru/rss/news"},
+    {"name":"vpk.name","country":"ru","branch":"press","type":"rss","url":"https://vpk.name/rss/"},
+    {"name":"N+1","country":"ru","branch":"press","type":"rss","url":"https://nplus1.ru/rss"},
+
+    {"name":"UK MoD","country":"uk","branch":"gov","type":"rss","url":"https://www.gov.uk/government/organisations/ministry-of-defence.atom"},
+    {"name":"RUSI","country":"uk","branch":"thinktank","type":"rss","url":"https://rusi.org/rss/latest-publications.xml"},
+    {"name":"UK Defence Journal","country":"uk","branch":"press","type":"rss","url":"https://ukdefencejournal.org.uk/feed/"},
+    {"name":"Navy Lookout","country":"uk","branch":"navy","type":"rss","url":"https://www.navylookout.com/feed/"},
+
+    {"name":"IFRI","country":"fr","branch":"thinktank","type":"rss","url":"https://www.ifri.org/en/rss.xml"},
+    {"name":"Opex360","country":"fr","branch":"press","type":"rss","url":"https://www.opex360.com/feed/"},
+
+    {"name":"防衛省","country":"jp","branch":"gov","type":"rss","url":"https://www.mod.go.jp/j/rss/news.xml"},
+
+    {"name":"MP-IDSA","country":"in","branch":"thinktank","type":"rss","url":"https://idsa.in/rss"},
+    {"name":"Indian Defence News","country":"in","branch":"press","type":"rss","url":"https://www.indiandefensenews.in/feeds/posts/default?alt=rss"},
+    {"name":"Indian Defence Review","country":"in","branch":"press","type":"rss","url":"https://indiandefencereview.com/feed/"},
+    {"name":"Bharat Rakshak","country":"in","branch":"press","type":"rss","url":"https://www.bharat-rakshak.com/feed/"},
+
+    {"name":"Jerusalem Post","country":"il","branch":"press","type":"rss","url":"https://www.jpost.com/RSS/RssFeedsHeadlines.aspx"},
+    {"name":"INSS","country":"il","branch":"thinktank","type":"rss","url":"https://www.inss.org.il/feed/"},
+
+    {"name":"Militarnyi","country":"ua","branch":"press","type":"rss","url":"https://militarnyi.com/en/news/feed/"}
+  ],
+  "redline_keywords": []
+}
