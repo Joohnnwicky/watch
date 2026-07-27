@@ -113,6 +113,32 @@ def main():
             b["items"].sort(key=lambda x: x.get("ts",0), reverse=True)
 
     branches_active = sum(len(c["branches"]) for c in countries)
+
+    # 合并上次的 AI 产物(翻译 zh + 要点 points):fetch 会重建全新 item 对象,
+    # 若不回填,digest 就得把所有条目重译一遍(浪费 token)。按 url 把旧 zh 贴回新 item。
+    old_zh, old_pts = {}, {}
+    oldp = os.path.join(ROOT, "data.js")
+    if os.path.exists(oldp):
+        try:
+            txt = open(oldp, encoding="utf-8").read()
+            od = json.loads(txt[txt.index("{"):txt.rindex("}")+1])
+            for c in od.get("countries", []):
+                if c.get("points"): old_pts[c["key"]] = c["points"]
+                for b in c.get("branches", []):
+                    for it in b.get("items", []):
+                        if it.get("zh") and it.get("url"):
+                            old_zh[it["url"]] = it["zh"]
+            merged = 0
+            for c in countries:
+                if c["key"] in old_pts: c["points"] = old_pts[c["key"]]
+                for b in c["branches"]:
+                    for it in b["items"]:
+                        if it.get("url") in old_zh:
+                            it["zh"] = old_zh[it["url"]]; merged += 1
+            if merged: print("  ↻ 已回填 %d 条旧翻译(免重译)" % merged)
+        except Exception as e:
+            print("  (跳过旧翻译合并:%s)" % str(e)[:60])
+
     data = {"generated_at": datetime.now(BEIJING).strftime("%Y-%m-%d %H:%M"),
             "recent_days":days, "countries":countries,
             "stats":{"countries":len(countries), "branches_active":branches_active,

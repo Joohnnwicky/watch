@@ -93,7 +93,7 @@ def process(country):
                     if not it.get("zh"):
                         v = zh.get(i, "")
                         if v: it["zh"] = v
-        if not country.get("points"): country["points"] = []
+        # 要点生成失败时不强制清空(保留原 points,无则保持缺省);LLM 失败不该破坏已有数据
 
     # 2) 翻译增量:近 TRANS_DAYS 天、且尚未翻译的条目(已有 zh 跳过,不重复消耗 token)
     cutoff = datetime.now(timezone.utc) - timedelta(days=TRANS_DAYS)

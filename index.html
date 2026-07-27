@@ -122,6 +122,43 @@
   .digest li .dj:hover{opacity:1; transform:translate(1px,-1px);}
   .row .ren{margin-top:3px; font-size:11.5px; line-height:1.35; color:hsl(var(--muted-foreground));
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.8;}
+
+  /* ---- 源管理弹窗 ---- */
+  .modal{position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:50; display:none;
+    align-items:center; justify-content:center; padding:24px;}
+  .modal.open{display:flex;}
+  .modal-card{background:hsl(var(--card)); border:1px solid hsl(var(--border)); border-radius:14px;
+    width:100%; max-width:760px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);}
+  .modal-head{display:flex; align-items:center; padding:18px 22px; border-bottom:1px solid hsl(var(--border));
+    gap:10px;}
+  .modal-head h2{font-size:17px; font-weight:700; flex:1;}
+  .modal-head .x{background:none; border:none; color:hsl(var(--muted-foreground)); font-size:22px;
+    cursor:pointer; padding:0 4px; line-height:1;}
+  .modal-head .x:hover{color:hsl(var(--foreground));}
+  .modal-body{flex:1; overflow:auto; padding:8px 0;}
+  .src-row{display:flex; align-items:center; gap:12px; padding:9px 22px; border-bottom:1px solid hsl(var(--border)/.5);}
+  .src-row:hover{background:hsl(var(--muted)/.30);}
+  .src-row .sn{flex:1; min-width:0; font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .src-row .sm{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:hsl(var(--muted-foreground));
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;}
+  .src-row .stag{font-size:10px; padding:2px 7px; border-radius:5px; background:hsl(var(--muted));
+    color:hsl(var(--muted-foreground)); white-space:nowrap; font-weight:600;}
+  .src-row .del{background:none; border:1px solid hsl(var(--border)); color:hsl(var(--muted-foreground));
+    border-radius:6px; padding:3px 9px; font-size:11px; cursor:pointer; transition:all .12s; flex-shrink:0;}
+  .src-row .del:hover{color:#ef4444; border-color:#ef4444;}
+  .modal-foot{border-top:1px solid hsl(var(--border)); padding:16px 22px; background:hsl(var(--muted)/.20);}
+  .add-form{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .add-form input, .add-form select{background:hsl(var(--background)); border:1px solid hsl(var(--border));
+    border-radius:7px; color:hsl(var(--foreground)); padding:8px 11px; font-size:13px; font-family:inherit;}
+  .add-form input[type=text]{flex:1; min-width:220px;}
+  .add-form select{font-size:12px;}
+  .add-form .add-btn{background:hsl(var(--primary)); color:#fff; border:none; border-radius:7px;
+    padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer;}
+  .add-form .add-btn:hover{filter:brightness(1.1);}
+  .add-form .add-btn:disabled{opacity:.5; cursor:default;}
+  .add-hint{margin-top:9px; font-size:11.5px; color:hsl(var(--muted-foreground)); line-height:1.5;}
+  .add-hint.ok{color:#10b981;} .add-hint.err{color:#f87171;} .add-hint.warn{color:#fbbf24;}
 </style>
 </head>
 <body>
@@ -131,6 +168,7 @@
       <span class="logo">军</span>
       <div class="bt">军事新闻<br><small>Military News</small></div>
       <button class="refresh" id="refreshBtn" title="刷新:重新抓取 + AI 要点 + 翻译"><span class="ri">⟳</span></button>
+      <button class="refresh" id="sourcesBtn" title="源管理:添加/删除 RSS 源"><span class="ri">⚙</span></button>
     </div>
     <div class="nav" id="nav"><div class="nav-label">国家 / Countries</div></div>
     <div class="foot" id="foot"></div>
@@ -140,6 +178,28 @@
     <div id="board"></div>
   </main>
 </div>
+
+<!-- 源管理弹窗 -->
+<div class="modal" id="srcModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>RSS 源管理</h2>
+      <span id="srcCount" style="font-size:12px;color:hsl(var(--muted-foreground));font-weight:500;"></span>
+      <button class="x" id="srcClose">×</button>
+    </div>
+    <div class="modal-body" id="srcList"></div>
+    <div class="modal-foot">
+      <div class="add-form">
+        <input type="text" id="addUrl" placeholder="贴官网 URL 或 RSS 链接,如 https://www.navalnews.com/">
+        <select id="addCountry"><option value="">国家…</option></select>
+        <select id="addBranch"><option value="">类别…</option></select>
+        <button class="add-btn" id="addBtn">订阅</button>
+      </div>
+      <div class="add-hint" id="addHint">贴官网地址会自动发现 RSS;也可直接贴 RSS 链接。无 RSS 时用 AI 判断分类。</div>
+    </div>
+  </div>
+</div>
+
 <script>
 function boot(){
   var D = window.DATA || {countries:[]};
@@ -340,6 +400,109 @@ function boot(){
       .catch(function(e){ rb.classList.remove('spin');
         alert('刷新失败: '+e+'\n(刷新需用 server.py 启动看板,纯静态服务没有刷新接口)'); });
   };
+
+  // ---- 源管理面板 ----
+  var modal=document.getElementById('srcModal');
+  var srcListEl=document.getElementById('srcList');
+  var srcCountEl=document.getElementById('srcCount');
+  var addHint=document.getElementById('addHint');
+  var META={countries:[],branches:[]};
+
+  function openSrcModal(){
+    modal.classList.add('open');
+    addHint.className='add-hint'; addHint.textContent='贴官网地址会自动发现 RSS;也可直接贴 RSS 链接。无 RSS 时用 AI 判断分类。';
+    document.getElementById('addUrl').value='';
+    loadSources();
+  }
+  function closeSrcModal(){ modal.classList.remove('open'); }
+
+  function loadSources(){
+    fetch('/api/sources').then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok) return;
+      META.countries=d.countries||[]; META.branches=d.branches||[];
+      // 填下拉
+      var cs=document.getElementById('addCountry'), bs=document.getElementById('addBranch');
+      cs.innerHTML='<option value="">国家…</option>'+META.countries.map(function(c){return '<option value="'+c.key+'">'+esc(c.name)+'</option>';}).join('');
+      bs.innerHTML='<option value="">类别…</option>'+META.branches.map(function(b){return '<option value="'+b.key+'">'+esc(b.name)+'</option>';}).join('');
+      // 渲染列表
+      var srcs=d.sources||[];
+      srcCountEl.textContent=srcs.length+' 个源';
+      // 按国家/分支分组排序
+      srcs.sort(function(a,b){return (a.country||'~')<(b.country||'~')?-1:1;});
+      srcListEl.innerHTML=srcs.map(function(s){
+        var cnm=(META.countries.find(function(c){return c.key===s.country;})||{}).name||s.country||'';
+        var bnm=(META.branches.find(function(b){return b.key===s.branch;})||{}).name||s.branch||'';
+        return '<div class="src-row">'
+          +'<div class="sn">'+esc(s.name||'(未命名)')+'</div>'
+          +'<span class="stag">'+esc(cnm||'-')+'/'+esc(bnm||'-')+'</span>'
+          +'<span class="sm" title="'+esc(s.url)+'">'+esc(s.url)+'</span>'
+          +'<button class="del" data-url="'+esc(s.url)+'">删除</button>'
+          +'</div>';
+      }).join('');
+      // 绑定删除
+      srcListEl.querySelectorAll('.del').forEach(function(btn){
+        btn.onclick=function(){
+          if(!confirm('删除源「'+(btn.parentNode.querySelector('.sn').textContent)+'」?')) return;
+          btn.disabled=true; btn.textContent='…';
+          fetch('/api/sources',{method:'DELETE',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({url:btn.dataset.url})})
+            .then(function(r){return r.json();})
+            .then(function(d){
+              if(d&&d.ok) loadSources();
+              else { btn.disabled=false; btn.textContent='删除'; alert('删除失败:'+(d&&d.error||'')); }
+            }).catch(function(e){ btn.disabled=false; btn.textContent='删除'; alert('删除失败:'+e); });
+        };
+      });
+    }).catch(function(e){ alert('加载源失败:'+e); });
+  }
+
+  // 添加源
+  var addBtn=document.getElementById('addBtn');
+  if(addBtn) addBtn.onclick=function(){
+    var url=document.getElementById('addUrl').value.trim();
+    var country=document.getElementById('addCountry').value;
+    var branch=document.getElementById('addBranch').value;
+    if(!url){ addHint.className='add-hint err'; addHint.textContent='请填 URL'; return; }
+    addBtn.disabled=true; addBtn.textContent='发现中…';
+    addHint.className='add-hint'; addHint.textContent='正在抓取并发现 RSS(可能调 AI,约数秒~十几秒)…';
+    fetch('/api/sources',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({url:url,country:country,branch:branch})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        addBtn.disabled=false; addBtn.textContent='订阅';
+        if(d&&d.ok){
+          addHint.className='add-hint ok';
+          addHint.textContent='✅ 已订阅「'+(d.source&&d.source.name||url)+'」,点右上角 ⟳ 刷新抓取';
+          document.getElementById('addUrl').value='';
+          loadSources();
+        } else {
+          var disc=d&&d.discovered;
+          if(disc&&d.error==='no_feed'){
+            // 发现失败但 LLM 给了分类建议
+            addHint.className='add-hint warn';
+            var m='⚠️ 未发现 RSS feed。';
+            if(disc.note) m+=disc.note+' ';
+            if(disc.is_military===false) m+='AI 判定疑似非军事/国防主题。';
+            m+='可尝试直接贴该站的 RSS 链接(如 .../feed 或 .../rss.xml)。';
+            addHint.textContent=m;
+            // 若有建议国家/分支,预填下拉方便重试
+            if(disc.country) document.getElementById('addCountry').value=disc.country;
+            if(disc.branch) document.getElementById('addBranch').value=disc.branch;
+          } else {
+            addHint.className='add-hint err';
+            addHint.textContent='❌ '+(d&&d.error||'添加失败');
+          }
+        }
+      }).catch(function(e){
+        addBtn.disabled=false; addBtn.textContent='订阅';
+        addHint.className='add-hint err'; addHint.textContent='❌ 请求失败:'+e;
+      });
+  };
+
+  document.getElementById('sourcesBtn').onclick=openSrcModal;
+  document.getElementById('srcClose').onclick=closeSrcModal;
+  modal.addEventListener('click',function(e){ if(e.target===modal) closeSrcModal(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeSrcModal(); });
 }
 var _s=document.createElement('script'); _s.src='data.js?t='+Date.now(); _s.onload=boot;
 _s.onerror=function(){document.getElementById('board').innerHTML='<div class="empty">数据加载失败</div>';};
